@@ -24,8 +24,9 @@ app.get("/api/hello", function (req, res) {
 });
 
 app.get('/api/:time', (req, res, next) => {
-  let num = Number(req.params.time);
-  let date = !num ? new Date(req.params.time) : new Date(num);
+  let time = req.params.time;
+  let date = Number(time) ? new Date(Number(time)) : new Date(time);
+  date == 'Invalid Date' ? next('route') : false;
   req.utc = date.toUTCString();
   req.unix = date.getTime();
   next();
@@ -33,6 +34,14 @@ app.get('/api/:time', (req, res, next) => {
 (req, res) => {
   res.json({"unix": req.unix, "utc": req.utc});
 });
+
+app.get('/api/:time', (req, res) => {
+  res.json({"error": "Invalid Date"})
+})
+
+app.get('/api/', (req, res) => {
+  res.json({"unix": Date.now(), "utc": new Date().toUTCString()})
+})
 
 // listen for requests :)
 var listener = app.listen(process.env.PORT, function () {
